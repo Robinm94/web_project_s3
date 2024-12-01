@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airbnb</title>
+</head>
+<body>
+    <header>
+        {{!-- add navigation here --}}
+        <nav>
+            <a href="/">Home</a>
+            <a href="/addnewairbnb">Add New</a>
+
+            <form action="/search" method="get" style="display: inline; margin-left: 20px;">
+                <label for="searchName" style="color: white;">Search:</label>
+                <input 
+                    type="text" 
+                    id="searchName" 
+                    name="name" 
+                    placeholder="Enter name" 
+                    required 
+                    style="padding: 5px;">
+                <button type="submit" style="padding: 5px 10px; cursor: pointer;">Go</button>
+            </form>
+        </nav>
+    </header>
+
+    <main>
+        {{{body}}}
+    </main>
+
+    <footer>
+        {{!-- add footer here --}}
+    </footer>
+</body>
+</html>

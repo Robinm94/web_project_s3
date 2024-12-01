@@ -1,0 +1,14 @@
+<h1>Step 3: Amenities</h1>
+<form action="/addnewairbnb/4" method="get">
+    <input type="hidden" name="name" value="{{formData.name}}">
+    <input type="hidden" name="summary" value="{{formData.summary}}">
+    <input type="hidden" name="price" value="{{formData.price}}">
+    <input type="hidden" name="bedrooms" value="{{formData.bedrooms}}">
+    <input type="hidden" name="beds" value="{{formData.beds}}">
+    <input type="hidden" name="bathrooms" value="{{formData.bathrooms}}">
+
+    <label for="amenities">Amenities (Comma-separated):</label>
+    <textarea id="amenities" name="amenities" required></textarea><br><br>
+
+    <button type="submit">Next</button>
+</form>
