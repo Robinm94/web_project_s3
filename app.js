@@ -33,11 +33,10 @@ app.set("view engine", "hbs");
 app.get("/", async function (req, res) {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
 
   try {
     const total = await Airbnb.countDocuments();
-    const listings = await Airbnb.find().skip(skip).limit(limit);
+    const listings = await db.getAllAirBnBs(page, limit);
     const totalPages = Math.ceil(total / limit);
 
     res.render("root", {
@@ -55,7 +54,7 @@ app.get("/", async function (req, res) {
 app.get("/api/airbnb/:listing_id", async function (req, res) {
   const id = req.params.listing_id;
   try {
-    const listing = await Airbnb.findOne({ _id: id });
+    const listing = await db.getAirBnBById(id);
     if (!listing) {
       return res.status(404).send("Airbnb not found");
     }
@@ -103,7 +102,7 @@ app.post("/addnewairbnb", async function (req, res) {
 app.get("/update/airbnb/:id", async function (req, res) {
   try {
     const id = req.params.id;
-    const listing = await Airbnb.findOne({ _id: id });
+    const listing = await db.getAirBnBById(id);
     if (!listing) {
       return res.status(404).send("Airbnb not found");
     }
@@ -127,7 +126,7 @@ app.post("/update/airbnb/:id", async function (req, res) {
       amenities: req.body.amenities ? req.body.amenities.split(",") : [],
     };
 
-    await Airbnb.updateOne({ _id: id }, { $set: updatedData });
+    await db.updateAirBnBById(updatedData, id);
 
     console.log(`Updated Airbnb with ID: ${id}`);
     res.redirect(`/api/airbnb/${id}`);
@@ -141,7 +140,7 @@ app.post("/update/airbnb/:id", async function (req, res) {
 app.post("/delete/airbnb/:id", async function (req, res) {
   try {
     const id = req.params.id;
-    const result = await Airbnb.deleteOne({ _id: id });
+    const result = await db.deleteAirBnBById(id);
     console.log(`Deleted Airbnb with ID: ${id}`);
     res.redirect("/");
   } catch (err) {
