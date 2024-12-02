@@ -1,0 +1,49 @@
+<h1>Airbnb Listings</h1>
+
+<ul>
+    {{#each listings}}
+    <li>
+        <h2>{{this.name}}</h2>
+        <a href="/api/airbnb/{{this._id}}">View Details</a>
+        <p>{{this.summary}}</p>
+        <p><strong>Price:</strong> ${{this.price}}</p>
+        <!-- delete button -->
+        <form action="/delete/airbnb/{{this._id}}" method="post" style="display: inline;">
+            <button type="submit" 
+                style="background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer;"
+                onclick="return confirm('Are you sure you want to delete this Airbnb?');">
+                Delete
+            </button>
+        </form>
+    </li>
+    {{/each}}
+</ul>
+
+<div>
+    <!-- Previous and Next buttons -->
+    {{#if hasPrevPage}}
+    <a href="/?page={{dec page}}&limit=10">Previous</a>
+    {{/if}}
+
+    <span>Page {{page}} of {{totalPages}}</span>
+
+    {{#if hasNextPage}}
+    <a href="/?page={{inc page}}&limit=10">Next</a>
+    {{/if}}
+</div>
+
+<div>
+    <!-- Jump to First or Last Page -->
+    <a href="/?page=1&limit=10">First Page</a>
+    <a href="/?page={{totalPages}}&limit=10">Last Page</a>
+</div>
+
+<div>
+    <!-- Jump to specific page -->
+    <form action="/" method="get" style="margin-top: 10px;">
+        <label for="pageInput">Go to page:</label>
+        <input type="number" id="pageInput" name="page" min="1" max="{{totalPages}}" value="{{page}}" required>
+        <input type="hidden" name="limit" value="10"> <!-- Limit is fixed to 10 -->
+        <button type="submit">Go</button>
+    </form>
+</div>

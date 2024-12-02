@@ -1,0 +1,17 @@
+<h1>Step 2: Room Information</h1>
+<form action="/addnewairbnb/3" method="get">
+    <input type="hidden" name="name" value="{{formData.name}}">
+    <input type="hidden" name="summary" value="{{formData.summary}}">
+    <input type="hidden" name="price" value="{{formData.price}}">
+
+    <label for="bedrooms">Bedrooms:</label>
+    <input type="number" id="bedrooms" name="bedrooms" required><br><br>
+
+    <label for="beds">Beds:</label>
+    <input type="number" id="beds" name="beds" required><br><br>
+
+    <label for="bathrooms">Bathrooms:</label>
+    <input type="number" id="bathrooms" name="bathrooms" step="0.1" required><br><br>
+
+    <button type="submit">Next</button>
+</form>

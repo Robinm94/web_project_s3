@@ -1,0 +1,83 @@
+<h1>{{listing.name}}</h1>
+<a href="/update/airbnb/{{listing._id}}" style="color: blue; text-decoration: underline;">Update this Airbnb</a>
+    <p><strong>Listing ID:</strong> {{listing._id}}</p>
+    <p><strong>Listing URL:</strong> <a href="{{listing.listing_url}}" target="_blank">{{listing.listing_url}}</a></p>
+    <p><strong>Summary:</strong> {{listing.summary}}</p>
+    <p><strong>Space:</strong> {{listing.space}}</p>
+    <p><strong>Description:</strong> {{listing.description}}</p>
+    <p><strong>Neighborhood Overview:</strong> {{listing.neighborhood_overview}}</p>
+    <p><strong>Notes:</strong> {{listing.notes}}</p>
+    <p><strong>Transit:</strong> {{listing.transit}}</p>
+    <p><strong>Access:</strong> {{listing.access}}</p>
+    <p><strong>Interaction:</strong> {{listing.interaction}}</p>
+    <p><strong>House Rules:</strong> {{listing.house_rules}}</p>
+    <p><strong>Property Type:</strong> {{listing.property_type}}</p>
+    <p><strong>Room Type:</strong> {{listing.room_type}}</p>
+    <p><strong>Bed Type:</strong> {{listing.bed_type}}</p>
+    <p><strong>Minimum Nights:</strong> {{listing.minimum_nights}}</p>
+    <p><strong>Maximum Nights:</strong> {{listing.maximum_nights}}</p>
+    <p><strong>Cancellation Policy:</strong> {{listing.cancellation_policy}}</p>
+    <p><strong>Last Scraped:</strong> {{listing.last_scraped}}</p>
+    <p><strong>Calendar Last Scraped:</strong> {{listing.calendar_last_scraped}}</p>
+    <p><strong>First Review:</strong> {{listing.first_review}}</p>
+    <p><strong>Last Review:</strong> {{listing.last_review}}</p>
+    <p><strong>Accommodates:</strong> {{listing.accommodates}}</p>
+    <p><strong>Bedrooms:</strong> {{listing.bedrooms}}</p>
+    <p><strong>Beds:</strong> {{listing.beds}}</p>
+    <p><strong>Bathrooms:</strong> {{listing.bathrooms}}</p>
+    <p><strong>Number of Reviews:</strong> {{listing.number_of_reviews}}</p>
+    <p><strong>Price:</strong> ${{listing.price}}</p>
+    <p><strong>Security Deposit:</strong> ${{listing.security_deposit}}</p>
+    <p><strong>Cleaning Fee:</strong> ${{listing.cleaning_fee}}</p>
+    <p><strong>Extra People Fee:</strong> ${{listing.extra_people}}</p>
+    <p><strong>Guests Included:</strong> {{listing.guests_included}}</p>
+
+    <h2>Images</h2>
+    <ul>
+        <li><strong>Thumbnail:</strong><br> <img src="{{listing.images.thumbnail_url}}" alt="Thumbnail Image" style="max-width: 100px; height: auto;"></li>
+        <li><strong>Medium:</strong><br> <img src="{{listing.images.medium_url}}" alt="Medium Image" style="max-width: 200px; height: auto;"></li>
+        <li><strong>Picture:</strong><br> <img src="{{listing.images.picture_url}}" alt="Picture Image" style="max-width: 300px; height: auto;"></li>
+    </ul>
+
+
+    <h2>Amenities</h2>
+    <ul>
+        {{#each listing.amenities}}
+        <li>{{this}}</li>
+        {{/each}}
+    </ul>
+
+    <h2>Host Information</h2>
+    <p><strong>Host Name:</strong> {{listing.host.host_name}}</p>
+    <p><strong>Host Since:</strong> {{listing.host.host_since}}</p>
+    <p><strong>Total Listings:</strong> {{listing.host.host_listings_count}}</p>
+
+    <h2>Address</h2>
+    <p><strong>Street:</strong> {{listing.address.street}}</p>
+    <p><strong>Suburb:</strong> {{listing.address.suburb}}</p>
+    <p><strong>Country:</strong> {{listing.address.country}}</p>
+
+    <h2>Availability</h2>
+    <p><strong>30 Days:</strong> {{listing.availability.availability_30}}</p>
+    <p><strong>60 Days:</strong> {{listing.availability.availability_60}}</p>
+    <p><strong>90 Days:</strong> {{listing.availability.availability_90}}</p>
+    <p><strong>365 Days:</strong> {{listing.availability.availability_365}}</p>
+
+    <h2>Review Scores</h2>
+    <p><strong>Accuracy:</strong> {{listing.review_scores.review_scores_accuracy}}</p>
+    <p><strong>Cleanliness:</strong> {{listing.review_scores.review_scores_cleanliness}}</p>
+    <p><strong>Check-in:</strong> {{listing.review_scores.review_scores_checkin}}</p>
+    <p><strong>Communication:</strong> {{listing.review_scores.review_scores_communication}}</p>
+    <p><strong>Location:</strong> {{listing.review_scores.review_scores_location}}</p>
+    <p><strong>Value:</strong> {{listing.review_scores.review_scores_value}}</p>
+
+    <h2>Reviews</h2>
+    <ul>
+        {{#each listing.reviews}}
+        <li>
+            <p><strong>Reviewer:</strong> {{this.reviewer_name}}</p>
+            <p><strong>Comments:</strong> {{this.comments}}</p>
+        </li>
+        {{/each}}
+    </ul>
+    <a href="/update/airbnb/{{listing._id}}" style="color: blue; text-decoration: underline;">Update this Airbnb</a>
