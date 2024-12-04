@@ -1,49 +1,65 @@
-<h1>Airbnb Listings</h1>
+<h1 class="listings-title">Airbnb Listings</h1>
 
-<ul>
-    {{#each listings}}
-    <li>
-        <h2>{{this.name}}</h2>
-        <a href="/api/airbnb/{{this._id}}">View Details</a>
-        <p>{{this.summary}}</p>
-        <p><strong>Price:</strong> ${{this.price}}</p>
-        <!-- delete button -->
-        <form action="/delete/airbnb/{{this._id}}" method="post" style="display: inline;">
-            <button type="submit" 
-                style="background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer;"
-                onclick="return confirm('Are you sure you want to delete this Airbnb?');">
-                Delete
-            </button>
-        </form>
+<ul class="listings">
+  {{#each listings}}
+    <li class="listing-item">
+      <h2 class="listing-name">{{this.name}}</h2>
+      <a href="/api/airbnb/{{this._id}}" class="listing-details-link">View
+        Details</a>
+      <p class="listing-summary">{{this.summary}}</p>
+      <p class="listing-price"><strong>Price:</strong> ${{this.price}}</p>
+      <!-- delete button -->
+      <form
+        action="/delete/airbnb/{{this._id}}"
+        method="post"
+        class="delete-form"
+      >
+        <button
+          type="submit"
+          class="delete-button"
+          onclick="return confirm('Are you sure you want to delete this Airbnb?');"
+        >
+          Delete
+        </button>
+      </form>
     </li>
-    {{/each}}
+  {{/each}}
 </ul>
 
-<div>
-    <!-- Previous and Next buttons -->
-    {{#if hasPrevPage}}
-    <a href="/?page={{dec page}}&limit=10">Previous</a>
-    {{/if}}
+<div class="pagination">
+  {{#if hasPrevPage}}
+    <a href="/?page={{dec page}}&limit=10" class="pagination-link">Previous</a>
+  {{/if}}
 
-    <span>Page {{page}} of {{totalPages}}</span>
+  <span class="pagination-info">Page {{page}} of {{totalPages}}</span>
 
-    {{#if hasNextPage}}
-    <a href="/?page={{inc page}}&limit=10">Next</a>
-    {{/if}}
+  {{#if hasNextPage}}
+    <a href="/?page={{inc page}}&limit=10" class="pagination-link">Next</a>
+  {{/if}}
 </div>
 
-<div>
-    <!-- Jump to First or Last Page -->
-    <a href="/?page=1&limit=10">First Page</a>
-    <a href="/?page={{totalPages}}&limit=10">Last Page</a>
+<div class="pagination-jump">
+  <!-- Jump to First or Last Page -->
+  <a href="/?page=1&limit=10" class="pagination-link">First Page</a>
+  <a href="/?page={{totalPages}}&limit=10" class="pagination-link">Last Page</a>
 </div>
 
-<div>
-    <!-- Jump to specific page -->
-    <form action="/" method="get" style="margin-top: 10px;">
-        <label for="pageInput">Go to page:</label>
-        <input type="number" id="pageInput" name="page" min="1" max="{{totalPages}}" value="{{page}}" required>
-        <input type="hidden" name="limit" value="10"> <!-- Limit is fixed to 10 -->
-        <button type="submit">Go</button>
-    </form>
+<div class="pagination-form">
+  <!-- Jump to specific page -->
+  <form action="/" method="get" class="pagination-form">
+    <label for="pageInput" class="pagination-label">Go to page:</label>
+    <input
+      type="number"
+      id="pageInput"
+      name="page"
+      min="1"
+      max="{{totalPages}}"
+      value="{{page}}"
+      required
+      class="pagination-input"
+    />
+    <input type="hidden" name="limit" value="10" />
+    <!-- Limit is fixed to 10 -->
+    <button type="submit" class="pagination-button">Go</button>
+  </form>
 </div>

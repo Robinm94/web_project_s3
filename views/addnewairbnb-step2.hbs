@@ -1,17 +1,36 @@
-<h1>Step 2: Room Information</h1>
-<form action="/addnewairbnb/3" method="get">
-    <input type="hidden" name="name" value="{{formData.name}}">
-    <input type="hidden" name="summary" value="{{formData.summary}}">
-    <input type="hidden" name="price" value="{{formData.price}}">
+<h1 class="form-title">Step 2: Room Information</h1>
+<form action="/addnewairbnb/3" method="get" class="room-info-form">
+  <input type="hidden" name="name" value="{{formData.name}}" />
+  <input type="hidden" name="summary" value="{{formData.summary}}" />
+  <input type="hidden" name="price" value="{{formData.price}}" />
 
-    <label for="bedrooms">Bedrooms:</label>
-    <input type="number" id="bedrooms" name="bedrooms" required><br><br>
+  <div class="form-group">
+    <label for="bedrooms" class="form-label">Bedrooms:</label>
+    <input
+      type="number"
+      id="bedrooms"
+      name="bedrooms"
+      class="form-input"
+      required
+    />
+  </div>
 
-    <label for="beds">Beds:</label>
-    <input type="number" id="beds" name="beds" required><br><br>
+  <div class="form-group">
+    <label for="beds" class="form-label">Beds:</label>
+    <input type="number" id="beds" name="beds" class="form-input" required />
+  </div>
 
-    <label for="bathrooms">Bathrooms:</label>
-    <input type="number" id="bathrooms" name="bathrooms" step="0.1" required><br><br>
+  <div class="form-group">
+    <label for="bathrooms" class="form-label">Bathrooms:</label>
+    <input
+      type="number"
+      id="bathrooms"
+      name="bathrooms"
+      class="form-input"
+      step="0.1"
+      required
+    />
+  </div>
 
-    <button type="submit">Next</button>
+  <button type="submit" class="form-button">Next</button>
 </form>

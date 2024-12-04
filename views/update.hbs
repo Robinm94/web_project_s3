@@ -1,25 +1,74 @@
-<h1>Update Airbnb: {{listing.name}}</h1>
+<h1 class="form-title">Update Airbnb: {{listing.name}}</h1>
 
-<form action="/update/airbnb/{{listing._id}}" method="post">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" value="{{listing.name}}" required><br><br>
+<form action="/update/airbnb/{{listing._id}}" method="post" class="update-form">
+  <div class="form-group">
+    <label for="name" class="form-label">Name:</label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      class="form-input"
+      value="{{listing.name}}"
+      required
+    />
+  </div>
 
-    <label for="summary">Summary:</label>
-    <textarea id="summary" name="summary" required>{{listing.summary}}</textarea><br><br>
+  <div class="form-group">
+    <label for="summary" class="form-label">Summary:</label>
+    <textarea
+      id="summary"
+      name="summary"
+      class="form-textarea"
+      required
+    >{{listing.summary}}</textarea>
+  </div>
 
-    <label for="price">Price:</label>
-    <input type="number" id="price" name="price" value="{{listing.price}}" required><br><br>
+  <div class="form-group">
+    <label for="price" class="form-label">Price:</label>
+    <input
+      type="number"
+      id="price"
+      name="price"
+      class="form-input"
+      value="{{listing.price}}"
+      required
+    />
+  </div>
 
-    <label for="bedrooms">Bedrooms:</label>
-    <input type="number" id="bedrooms" name="bedrooms" value="{{listing.bedrooms}}" required><br><br>
+  <div class="form-group">
+    <label for="bedrooms" class="form-label">Bedrooms:</label>
+    <input
+      type="number"
+      id="bedrooms"
+      name="bedrooms"
+      class="form-input"
+      value="{{listing.bedrooms}}"
+      required
+    />
+  </div>
 
-    <label for="bathrooms">Bathrooms:</label>
-    <input type="number" id="bathrooms" name="bathrooms" value="{{listing.bathrooms}}" step="0.1" required><br><br>
+  <div class="form-group">
+    <label for="bathrooms" class="form-label">Bathrooms:</label>
+    <input
+      type="number"
+      id="bathrooms"
+      name="bathrooms"
+      class="form-input"
+      value="{{listing.bathrooms}}"
+      step="0.1"
+      required
+    />
+  </div>
 
-    <label for="amenities">Amenities (Comma-separated):</label>
-    <textarea id="amenities" name="amenities" required>{{listing.amenities}}</textarea><br><br>
+  <div class="form-group">
+    <label for="amenities" class="form-label">Amenities (Comma-separated):</label>
+    <textarea
+      id="amenities"
+      name="amenities"
+      class="form-textarea"
+      required
+    >{{listing.amenities}}</textarea>
+  </div>
 
-    <button type="submit" style="background-color: green; color: white; padding: 10px 20px; border: none; cursor: pointer;">
-        Update
-    </button>
+  <button type="submit" class="form-button">Update</button>
 </form>
