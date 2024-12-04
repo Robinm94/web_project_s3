@@ -1,13 +1,24 @@
-<h1>Step 1: Basic Information</h1>
-<form action="/addnewairbnb/2" method="get">
-    <label for="name">Name:</label>
-    <input type="text" id="name" name="name" required><br><br>
+<h1 class="form-title">Step 1: Basic Information</h1>
+<form action="/addnewairbnb/2" method="get" class="basic-info-form">
+  <div class="form-group">
+    <label for="name" class="form-label">Name:</label>
+    <input type="text" id="name" name="name" class="form-input" required />
+  </div>
 
-    <label for="summary">Summary:</label>
-    <textarea id="summary" name="summary" required></textarea><br><br>
+  <div class="form-group">
+    <label for="summary" class="form-label">Summary:</label>
+    <textarea
+      id="summary"
+      name="summary"
+      class="form-textarea"
+      required
+    ></textarea>
+  </div>
 
-    <label for="price">Price:</label>
-    <input type="number" id="price" name="price" required><br><br>
+  <div class="form-group">
+    <label for="price" class="form-label">Price:</label>
+    <input type="number" id="price" name="price" class="form-input" required />
+  </div>
 
-    <button type="submit">Next</button>
+  <button type="submit" class="form-button">Next</button>
 </form>

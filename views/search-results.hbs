@@ -1,36 +1,52 @@
-<h1>Search Results for "{{searchName}}"</h1>
+<h1 class="search-title">Search Results for "{{searchName}}"</h1>
 
-<ul>
-    {{#each results}}
-    <li>
-        <h2>{{this.name}}</h2>
-        <a href="/api/airbnb/{{this._id}}">View Details</a>
-        <p>{{this.summary}}</p>
-        <p><strong>Price:</strong> ${{this.price}}</p>
+<ul class="search-results">
+  {{#each results}}
+    <li class="search-result-item">
+      <h2 class="search-result-name">{{this.name}}</h2>
+      <a href="/api/airbnb/{{this._id}}" class="search-result-link">View Details</a>
+      <p class="search-result-summary">{{this.summary}}</p>
+      <p class="search-result-price"><strong>Price:</strong> ${{this.price}}</p>
     </li>
-    {{/each}}
+  {{/each}}
 </ul>
 
-<div>
-    <!-- Previous and Next buttons -->
-    {{#if hasPrevPage}}
-    <a href="/search?name={{searchName}}&page={{dec page}}&limit=10">Previous</a>
-    {{/if}}
+<div class="pagination">
+  <!-- Previous and Next buttons -->
+  {{#if hasPrevPage}}
+    <a
+      href="/search?name={{searchName}}&page={{dec page}}&limit=10"
+      class="pagination-link"
+    >Previous</a>
+  {{/if}}
 
-    <span>Page {{page}} of {{totalPages}}</span>
+  <span class="pagination-info">Page {{page}} of {{totalPages}}</span>
 
-    {{#if hasNextPage}}
-    <a href="/search?name={{searchName}}&page={{inc page}}&limit=10">Next</a>
-    {{/if}}
+  {{#if hasNextPage}}
+    <a
+      href="/search?name={{searchName}}&page={{inc page}}&limit=10"
+      class="pagination-link"
+    >Next</a>
+  {{/if}}
 </div>
 
-<div>
-    <!-- Jump to specific page -->
-    <form action="/search" method="get" style="margin-top: 10px;">
-        <input type="hidden" name="name" value="{{searchName}}">
-        <label for="pageInput">Go to page:</label>
-        <input type="number" id="pageInput" name="page" min="1" max="{{totalPages}}" value="{{page}}" required>
-        <input type="hidden" name="limit" value="10">
-        <button type="submit">Go</button>
-    </form>
+<div class="pagination-form">
+  <!-- Jump to specific page -->
+  <form action="/search" method="get" class="pagination-form">
+    <input type="hidden" name="name" value="{{searchName}}" />
+    <label for="pageInput" class="pagination-label">Go to page:</label>
+    <input
+      type="number"
+      id="pageInput"
+      name="page"
+      min="1"
+      max="{{totalPages}}"
+      value="{{page}}"
+      required
+      class="pagination-input"
+    />
+    <input type="hidden" name="limit" value="10" />
+    <!-- Limit is fixed to 10 -->
+    <button type="submit" class="pagination-button">Go</button>
+  </form>
 </div>

@@ -1,13 +1,14 @@
-<h1>Step 4: Submit</h1>
-<form action="/addnewairbnb" method="post">
-    <input type="hidden" name="name" value="{{formData.name}}">
-    <input type="hidden" name="summary" value="{{formData.summary}}">
-    <input type="hidden" name="price" value="{{formData.price}}">
-    <input type="hidden" name="bedrooms" value="{{formData.bedrooms}}">
-    <input type="hidden" name="beds" value="{{formData.beds}}">
-    <input type="hidden" name="bathrooms" value="{{formData.bathrooms}}">
-    <input type="hidden" name="amenities" value="{{formData.amenities}}">
+<h1 class="form-title">Step 4: Submit</h1>
+<form action="/addnewairbnb" method="post" class="submit-form">
+  <input type="hidden" name="name" value="{{formData.name}}" />
+  <input type="hidden" name="summary" value="{{formData.summary}}" />
+  <input type="hidden" name="price" value="{{formData.price}}" />
+  <input type="hidden" name="bedrooms" value="{{formData.bedrooms}}" />
+  <input type="hidden" name="beds" value="{{formData.beds}}" />
+  <input type="hidden" name="bathrooms" value="{{formData.bathrooms}}" />
+  <input type="hidden" name="amenities" value="{{formData.amenities}}" />
 
+  <div class="form-summary">
     <p><strong>Name:</strong> {{formData.name}}</p>
     <p><strong>Summary:</strong> {{formData.summary}}</p>
     <p><strong>Price:</strong> ${{formData.price}}</p>
@@ -15,6 +16,7 @@
     <p><strong>Beds:</strong> {{formData.beds}}</p>
     <p><strong>Bathrooms:</strong> {{formData.bathrooms}}</p>
     <p><strong>Amenities:</strong> {{formData.amenities}}</p>
+  </div>
 
-    <button type="submit">Submit</button>
+  <button type="submit" class="form-button">Submit</button>
 </form>

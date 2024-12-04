@@ -8,9 +8,9 @@ const db = require("./db-operators/db-operations");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static("public"));
 
 const path = require("path");
+app.use(express.static(path.join(__dirname, "public")));
 app.set("views", path.join(__dirname, "views"));
 const handlebars = require("express-handlebars");
 app.engine(
@@ -251,7 +251,7 @@ app.delete("/api/AirBnBs/:id", async function (req, res) {
   const id = req.params.id;
   try {
     await db.deleteAirBnBById(id);
-    res.status(204).send();
+    res.status(200).send("Deleted Airbnb successfully");
   } catch (err) {
     console.error("Error deleting Airbnb:", err);
     res.status(500).json({ error: "Failed to delete Airbnb" });
