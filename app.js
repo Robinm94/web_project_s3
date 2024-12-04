@@ -169,7 +169,9 @@ app.get("/search", async function (req, res) {
     const totalPages = Math.ceil(total / limit);
 
     if (results.length === 0) {
-      return res.status(404).send("No listings found with the provided name.");
+      return res.render("error", {
+        error: "No listings found with the provided name.",
+      });
     }
 
     res.render("search-results", {
