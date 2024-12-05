@@ -5,10 +5,10 @@ const AirbnbSchema = new Schema(
   {
     _id: { type: String, required: true },
     listing_url: String,
-    name: String,
+    name: { type: String, required: true },
     summary: String,
     space: String,
-    description: String,
+    description: { type: String, required: true },
     neighborhood_overview: String,
     notes: String,
     transit: String,

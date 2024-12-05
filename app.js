@@ -190,6 +190,15 @@ app.get("/search", async function (req, res) {
 
 app.post("/api/AirBnBs", async function (req, res) {
   try {
+    if (!req.body._id) {
+      res.status(400).json({ error: "Airbnb ID is required" });
+      return;
+    }
+    const existingAirBnB = await db.getAirBnBById(id);
+    if (existingAirBnB) {
+      res.status(400).json({ error: "Airbnb already exists" });
+      return;
+    }
     const newAirbnb = await db.addNewAirBnB(req.body);
     res.status(201).json(newAirbnb);
   } catch (err) {
