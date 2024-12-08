@@ -228,7 +228,7 @@ app.post(
         res.status(400).json({ error: "Airbnb ID is required" });
         return;
       }
-      const existingAirBnB = await db.getAirBnBById(id);
+      const existingAirBnB = await db.getAirBnBExistsById(req.body._id);
       if (existingAirBnB) {
         res.status(400).json({ error: "Airbnb already exists" });
         return;

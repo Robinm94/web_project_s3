@@ -37,6 +37,19 @@ module.exports = {
     }
   },
 
+  async getAirBnBExistsById(Id) {
+    try {
+      const result = await Airbnb.findById(Id);
+      if (!result) {
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.error("Error fetching AirBnB by ID:", err);
+      throw err;
+    }
+  },
+
   async updateAirBnBById(data, Id) {
     try {
       const result = await Airbnb.findByIdAndUpdate(Id, data, {
