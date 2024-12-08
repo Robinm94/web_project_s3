@@ -4,8 +4,7 @@
   {{#each listings}}
     <li class="listing-item">
       <h2 class="listing-name">{{this.name}}</h2>
-      <a href="/api/airbnb/{{this._id}}" class="listing-details-link">View
-        Details</a>
+      <a href="/airbnb/{{this._id}}" class="listing-details-link">View Details</a>
       <p class="listing-summary">{{this.summary}}</p>
       <p class="listing-price"><strong>Price:</strong> ${{this.price}}</p>
       <!-- delete button -->

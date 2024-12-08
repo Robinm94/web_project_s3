@@ -1,4 +1,4 @@
-require('dotenv').config();
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
@@ -6,11 +6,12 @@ const database = require("./config/database");
 const bodyParser = require("body-parser");
 const Airbnb = require("./models/airbnb");
 const db = require("./db-operators/db-operations");
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require("./routes/userRoutes");
+const { body, query, validationResult } = require("express-validator");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use('/api/users', userRoutes);
+app.use("/api/users", userRoutes);
 
 const path = require("path");
 app.use(express.static(path.join(__dirname, "public")));
@@ -54,7 +55,7 @@ app.get("/", async function (req, res) {
   }
 });
 
-app.get("/api/airbnb/:listing_id", async function (req, res) {
+app.get("/airbnb/:listing_id", async function (req, res) {
   const id = req.params.listing_id;
   try {
     const listing = await db.getAirBnBById(id);
@@ -132,7 +133,7 @@ app.post("/update/airbnb/:id", async function (req, res) {
     await db.updateAirBnBById(updatedData, id);
 
     console.log(`Updated Airbnb with ID: ${id}`);
-    res.redirect(`/api/airbnb/${id}`);
+    res.redirect(`/airbnb/${id}`);
   } catch (err) {
     console.error("Error updating Airbnb:", err);
     res.status(500).send(err);
@@ -210,19 +211,103 @@ app.post("/api/AirBnBs", async function (req, res) {
   }
 });
 
-app.get("/api/AirBnBs", async function (req, res) {
-  const page = parseInt(req.query.page) || 1;
-  const perPage = parseInt(req.query.perPage) || 10;
-  const property_type = req.query.property_type;
+app.get(
+  "/api/AirBnBs",
+  query("page").isNumeric(),
+  query("perPage").isNumeric(),
+  query("property_type").optional().escape(),
+  async function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array() });
+    }
+    const page = parseInt(req.query.page);
+    const perPage = parseInt(req.query.perPage);
+    const property_type = req.query.property_type;
 
-  try {
-    const airbnbs = await db.getAllAirBnBs(page, perPage, property_type);
-    res.json(airbnbs);
-  } catch (err) {
-    console.error("Error fetching AirBnBs:", err);
-    res.status(500).json({ error: "Failed to fetch AirBnBs" });
+    try {
+      const pageCount = await db.getPageCount(
+        perPage,
+        property_type ? { property_type: property_type } : {}
+      );
+      if (pageCount === 0) {
+        return res.status(404).json({ error: "No AirBnBs found" });
+      }
+      if (page < 1) {
+        return res.redirect(
+          307,
+          `/api/AirBnBs?page=1&perPage=${perPage}${
+            property_type ? `&property_type=${property_type}` : ""
+          }`
+        );
+      }
+      if (page > pageCount) {
+        return res.redirect(
+          307,
+          `/api/AirBnBs?page=${pageCount}&perPage=${perPage}${
+            property_type ? `&property_type=${property_type}` : ""
+          }`
+        );
+      }
+
+      const airbnbs = await db.getAllAirBnBs(
+        page,
+        perPage,
+        property_type ? { property_type: property_type } : {}
+      );
+
+      return res.json(airbnbs);
+    } catch (err) {
+      console.error("Error fetching AirBnBs:", err);
+      res.status(500).json({ error: "Failed to fetch AirBnBs" });
+    }
   }
-});
+);
+
+app.get(
+  "/api/AirBnBs/search",
+  query("page").optional().isNumeric(),
+  query("perPage").optional().isNumeric(),
+  query("name").optional().escape(),
+  async function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ error: errors.array() });
+    }
+    const searchName = req.query.name || "";
+    const page = parseInt(req.query.page) || 1;
+    const perPage = parseInt(req.query.perPage) || 10;
+
+    try {
+      const pageCount = await db.getPageCount(perPage, {
+        name: { $regex: searchName, $options: "i" },
+      });
+      if (pageCount === 0) {
+        return res.status(404).json({ error: "No AirBnBs found" });
+      }
+      if (page < 1) {
+        return res.redirect(
+          307,
+          `/api/AirBnBs/search?page=1&perPage=${perPage}&name=${searchName}`
+        );
+      }
+      if (page > pageCount) {
+        return res.redirect(
+          307,
+          `/api/AirBnBs/search?page=${pageCount}&perPage=${perPage}&name=${searchName}`
+        );
+      }
+      const airbnbs = await db.getAllAirBnBs(page, perPage, {
+        name: { $regex: searchName, $options: "i" },
+      });
+
+      return res.json(airbnbs);
+    } catch (err) {
+      console.error("Error searching for Airbnb listings:", err);
+      res.status(500).send("Error searching for Airbnb listings.");
+    }
+  }
+);
 
 app.get("/api/AirBnBs/:id", async function (req, res) {
   const id = req.params.id;
@@ -232,6 +317,7 @@ app.get("/api/AirBnBs/:id", async function (req, res) {
       return res.status(404).json({ error: "Airbnb not found" });
     }
     const response = {
+      name: airbnb.name,
       listing_url: airbnb.listing_url,
       description: airbnb.description,
       neighborhood_overview: airbnb.neighborhood_overview,

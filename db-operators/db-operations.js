@@ -68,8 +68,7 @@ module.exports = {
     }
   },
 
-  async getAllAirBnBs(page, perPage, property_type) {
-    const query = property_type ? { property_type: property_type } : {};
+  async getAllAirBnBs(page, perPage, query) {
     try {
       const results = await Airbnb.find(query)
         .sort({ _id: 1 })
@@ -78,6 +77,16 @@ module.exports = {
       return results;
     } catch (err) {
       console.error("Error fetching AirBnBs:", err);
+      throw err;
+    }
+  },
+
+  async getPageCount(perPage, query) {
+    try {
+      const total = await Airbnb.countDocuments(query);
+      return Math.ceil(total / perPage);
+    } catch (err) {
+      console.error("Error fetching page count:", err);
       throw err;
     }
   },
