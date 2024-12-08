@@ -8,10 +8,37 @@ const Airbnb = require("./models/airbnb");
 const db = require("./db-operators/db-operations");
 const userRoutes = require("./routes/userRoutes");
 const { body, query, validationResult } = require("express-validator");
+const passport = require("passport");
+const { Strategy: JwtStrategy, ExtractJwt } = require("passport-jwt");
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use("/api/users", userRoutes);
+
+const jwtOptions = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: process.env.JWT_SECRET,
+};
+
+const strategy = new JwtStrategy(jwtOptions, function (jwt_payload, next) {
+  console.log("payload received", jwt_payload);
+
+  if (jwt_payload) {
+    next(null, {
+      id: jwt_payload._id,
+      username: jwt_payload.username,
+      roles: jwt_payload.roles,
+    });
+  } else {
+    next(null, false);
+  }
+});
+
+// tell passport to use our "strategy"
+passport.use(strategy);
+
+// add passport as application-level middleware
+app.use(passport.initialize());
 
 const path = require("path");
 app.use(express.static(path.join(__dirname, "public")));
@@ -192,24 +219,28 @@ app.get("/search", async function (req, res) {
   }
 });
 
-app.post("/api/AirBnBs", async function (req, res) {
-  try {
-    if (!req.body._id) {
-      res.status(400).json({ error: "Airbnb ID is required" });
-      return;
+app.post(
+  "/api/AirBnBs",
+  passport.authenticate("jwt", { session: false }),
+  async function (req, res) {
+    try {
+      if (!req.body._id) {
+        res.status(400).json({ error: "Airbnb ID is required" });
+        return;
+      }
+      const existingAirBnB = await db.getAirBnBById(id);
+      if (existingAirBnB) {
+        res.status(400).json({ error: "Airbnb already exists" });
+        return;
+      }
+      const newAirbnb = await db.addNewAirBnB(req.body);
+      res.status(201).json(newAirbnb);
+    } catch (err) {
+      console.error("Error adding new Airbnb:", err);
+      res.status(500).json({ error: "Failed to add new Airbnb" });
     }
-    const existingAirBnB = await db.getAirBnBById(id);
-    if (existingAirBnB) {
-      res.status(400).json({ error: "Airbnb already exists" });
-      return;
-    }
-    const newAirbnb = await db.addNewAirBnB(req.body);
-    res.status(201).json(newAirbnb);
-  } catch (err) {
-    console.error("Error adding new Airbnb:", err);
-    res.status(500).json({ error: "Failed to add new Airbnb" });
   }
-});
+);
 
 app.get(
   "/api/AirBnBs",
@@ -336,27 +367,35 @@ app.get("/api/AirBnBs/:id", async function (req, res) {
   }
 });
 
-app.put("/api/AirBnBs/:id", async function (req, res) {
-  const id = req.params.id;
-  try {
-    const updatedAirbnb = await db.updateAirBnBById(req.body, id);
-    res.status(200).json(updatedAirbnb);
-  } catch (err) {
-    console.error("Error updating Airbnb:", err);
-    res.status(500).json({ error: "Failed to update Airbnb" });
+app.put(
+  "/api/AirBnBs/:id",
+  passport.authenticate("jwt", { session: false }),
+  async function (req, res) {
+    const id = req.params.id;
+    try {
+      const updatedAirbnb = await db.updateAirBnBById(req.body, id);
+      res.status(200).json(updatedAirbnb);
+    } catch (err) {
+      console.error("Error updating Airbnb:", err);
+      res.status(500).json({ error: "Failed to update Airbnb" });
+    }
   }
-});
+);
 
-app.delete("/api/AirBnBs/:id", async function (req, res) {
-  const id = req.params.id;
-  try {
-    await db.deleteAirBnBById(id);
-    res.status(200).send("Deleted Airbnb successfully");
-  } catch (err) {
-    console.error("Error deleting Airbnb:", err);
-    res.status(500).json({ error: "Failed to delete Airbnb" });
+app.delete(
+  "/api/AirBnBs/:id",
+  passport.authenticate("jwt", { session: false }),
+  async function (req, res) {
+    const id = req.params.id;
+    try {
+      await db.deleteAirBnBById(id);
+      res.status(200).send("Deleted Airbnb successfully");
+    } catch (err) {
+      console.error("Error deleting Airbnb:", err);
+      res.status(500).json({ error: "Failed to delete Airbnb" });
+    }
   }
-});
+);
 
 app.get("/api/AirBnBs/review/:id", async function (req, res) {
   const id = req.params.id;
