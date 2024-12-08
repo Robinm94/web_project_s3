@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
@@ -5,9 +6,11 @@ const database = require("./config/database");
 const bodyParser = require("body-parser");
 const Airbnb = require("./models/airbnb");
 const db = require("./db-operators/db-operations");
+const userRoutes = require('./routes/userRoutes');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use('/api/users', userRoutes);
 
 const path = require("path");
 app.use(express.static(path.join(__dirname, "public")));
