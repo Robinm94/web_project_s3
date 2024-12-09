@@ -30,11 +30,9 @@ router.post("/register", async (req, res) => {
     });
 
     await newUser.save();
-    console.log("New user created:", newUser);
 
     res.status(201).json({ message: "User registered successfully", apiKey });
   } catch (error) {
-    console.error("Error during user registration:", error);
     res.status(500).json({ error: "Failed to register user" });
   }
 });
@@ -43,7 +41,6 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    console.log("Login request received:", username, password);
 
     // Fetch the user by username
     const user = await User.findOne({ username });
@@ -52,21 +49,15 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Invalid username or password" });
     }
 
-    console.log("Database record found:", user);
-
     // Validate password using bcrypt.compare
     try {
       const isPasswordMatch = await bcrypt.compare(password, user.password);
       if (!isPasswordMatch) {
-        console.log("Password mismatch");
         return res.status(400).json({ error: "Invalid username or password" });
       }
     } catch (error) {
-      console.error("Error during password comparison:", error);
       return res.status(500).json({ error: "Internal server error" });
     }
-
-    console.log("Passwords match, generating JWT.");
 
     // Generate JWT
     const token = jwt.sign(
@@ -75,9 +66,8 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.json({ message: "Login successful", token });
+    res.json({ message: "Login successful", token, apiKey: user.apiKey });
   } catch (error) {
-    console.error("Error during login:", error);
     res.status(500).json({ error: "Failed to log in" });
   }
 });
