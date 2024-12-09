@@ -7,7 +7,7 @@ const bodyParser = require("body-parser");
 const Airbnb = require("./models/airbnb");
 const db = require("./db-operators/db-operations");
 const userRoutes = require("./routes/userRoutes");
-const { body, query, validationResult } = require("express-validator");
+const { body, query, param, validationResult } = require("express-validator");
 const passport = require("./config/passport");
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -33,7 +33,7 @@ const authenticate = (req, res, next) => {
 // Role-based authorization middleware
 const authorize = (roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    if (!roles.some((role) => req.user.roles.includes(role))) {
       return res.status(403).json({
         error: "Forbidden",
         message: `Only ${roles} are allowed to access this resource`,
@@ -222,24 +222,31 @@ app.get("/search", async function (req, res) {
   }
 });
 
-app.post("/api/AirBnBs", authenticate, async function (req, res) {
-  try {
-    if (!req.body._id) {
-      res.status(400).json({ error: "Airbnb ID is required" });
-      return;
+app.post(
+  "/api/AirBnBs",
+  authenticate,
+  body("_id").isNumeric(),
+  body("name").isString(),
+  body("description").isString(),
+  async function (req, res) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ error: errors.array() });
+      }
+      const existingAirBnB = await db.getAirBnBById(req.body._id);
+      if (existingAirBnB) {
+        res.status(400).json({ error: "Airbnb already exists" });
+        return;
+      }
+      const newAirbnb = await db.addNewAirBnB(req.body);
+      res.status(201).json(newAirbnb);
+    } catch (err) {
+      console.error("Error adding new Airbnb:", err);
+      res.status(500).json({ error: "Failed to add new Airbnb" });
     }
-    const existingAirBnB = await db.getAirBnBById(req.body._id);
-    if (existingAirBnB) {
-      res.status(400).json({ error: "Airbnb already exists" });
-      return;
-    }
-    const newAirbnb = await db.addNewAirBnB(req.body);
-    res.status(201).json(newAirbnb);
-  } catch (err) {
-    console.error("Error adding new Airbnb:", err);
-    res.status(500).json({ error: "Failed to add new Airbnb" });
   }
-});
+);
 
 app.get(
   "/api/AirBnBs",
@@ -339,7 +346,11 @@ app.get(
   }
 );
 
-app.get("/api/AirBnBs/:id", async function (req, res) {
+app.get("/api/AirBnBs/:id", param("id").isNumeric(), async function (req, res) {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).send("Invalid ID");
+  }
   const id = req.params.id;
   try {
     const airbnb = await db.getAirBnBById(id);
@@ -366,22 +377,36 @@ app.get("/api/AirBnBs/:id", async function (req, res) {
   }
 });
 
-app.put("/api/AirBnBs/:id", authenticate, async function (req, res) {
-  const id = req.params.id;
-  try {
-    const updatedAirbnb = await db.updateAirBnBById(req.body, id);
-    res.status(200).json(updatedAirbnb);
-  } catch (err) {
-    console.error("Error updating Airbnb:", err);
-    res.status(500).json({ error: "Failed to update Airbnb" });
+app.put(
+  "/api/AirBnBs/:id",
+  authenticate,
+  param("id").isNumeric(),
+  async function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).send("Invalid ID");
+    }
+    const id = req.params.id;
+    try {
+      const updatedAirbnb = await db.updateAirBnBById(req.body, id);
+      res.status(200).json(updatedAirbnb);
+    } catch (err) {
+      console.error("Error updating Airbnb:", err);
+      res.status(500).json({ error: "Failed to update Airbnb" });
+    }
   }
-});
+);
 
 app.delete(
   "/api/AirBnBs/:id",
   authenticate,
   authorize(["admin"]),
+  param("id").isNumeric(),
   async function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).send("Invalid ID");
+    }
     const id = req.params.id;
     try {
       await db.deleteAirBnBById(id);
@@ -393,28 +418,36 @@ app.delete(
   }
 );
 
-app.get("/api/AirBnBs/review/:id", async function (req, res) {
-  const id = req.params.id;
-  try {
-    const airbnb = await db.getAirBnBById(id);
-    if (!airbnb) {
-      return res.status(404).json({ error: "Airbnb not found" });
+app.get(
+  "/api/AirBnBs/review/:id",
+  param("id").isNumeric(),
+  async function (req, res) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).send("Invalid ID");
     }
-    const response = {
-      number_of_reviews: airbnb.number_of_reviews,
-      first_review: airbnb.first_review,
-      last_review: airbnb.last_review,
-      reviews: airbnb.reviews.map((review) => ({
-        review_date: review.date,
-        comment: review.comments,
-      })),
-    };
-    res.json(response);
-  } catch (err) {
-    console.error("Error fetching Airbnb reviews by ID:", err);
-    res.status(500).json({ error: "Failed to fetch Airbnb reviews" });
+    const id = req.params.id;
+    try {
+      const airbnb = await db.getAirBnBById(id);
+      if (!airbnb) {
+        return res.status(404).json({ error: "Airbnb not found" });
+      }
+      const response = {
+        number_of_reviews: airbnb.number_of_reviews,
+        first_review: airbnb.first_review,
+        last_review: airbnb.last_review,
+        reviews: airbnb.reviews.map((review) => ({
+          review_date: review.date,
+          comment: review.comments,
+        })),
+      };
+      res.json(response);
+    } catch (err) {
+      console.error("Error fetching Airbnb reviews by ID:", err);
+      res.status(500).json({ error: "Failed to fetch Airbnb reviews" });
+    }
   }
-});
+);
 
 db.initialize(database.url)
   .then(() => {
