@@ -1,19 +1,25 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const app = express();
-const database = require("./config/database");
 const bodyParser = require("body-parser");
-const Airbnb = require("./models/airbnb");
-const db = require("./db-operators/db-operations");
-const userRoutes = require("./routes/userRoutes");
-const { body, query, param, validationResult } = require("express-validator");
+const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
 const passport = require("./config/passport");
+const userRoutes = require("./routes/userRoutes");
+const db = require("./db-operators/db-operations");
+const database = require("./config/database");
+const Airbnb = require("./models/airbnb");
+const User = require("./models/user");
+const jwt = require("jsonwebtoken");
+const { body, query, param, validationResult } = require("express-validator");
+
+const app = express();
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use("/api/users", userRoutes);
+app.use(cookieParser());
 app.use(passport.initialize());
+app.use("/api/users", userRoutes);
 
 // Custom middleware to authenticate using either JWT or API key
 const authenticate = (req, res, next) => {
@@ -28,6 +34,31 @@ const authenticate = (req, res, next) => {
       next();
     }
   )(req, res, next);
+};
+
+const authenticateUI = (req, res, next) => {
+  const token = req.cookies.jwt;
+  if (!token) {
+    return res.redirect("/airbnb/login");
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.redirect("/airbnb/login");
+    }
+    req.user = decoded;
+    next();
+  });
+};
+
+const authenticateUINonRedirect = (req, res, next) => {
+  const token = req.cookies.jwt;
+  if (token) {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      req.user = decoded;
+    });
+  }
+  next();
 };
 
 // Role-based authorization middleware
@@ -64,7 +95,7 @@ app.engine(
 );
 app.set("view engine", "hbs");
 
-app.get("/", async function (req, res) {
+app.get("/", authenticateUINonRedirect, async function (req, res) {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
 
@@ -79,38 +110,91 @@ app.get("/", async function (req, res) {
       totalPages,
       hasNextPage: page < totalPages,
       hasPrevPage: page > 1,
+      isAuthenticated: !!req.user,
     });
   } catch (err) {
     res.status(500).send(err);
   }
 });
 
-app.get("/airbnb/:listing_id", async function (req, res) {
-  const id = req.params.listing_id;
+app.get("/airbnb/login", (req, res) => {
+  res.render("login");
+});
+
+app.post("/airbnb/login", async (req, res) => {
   try {
-    const listing = await db.getAirBnBById(id);
-    if (!listing) {
-      return res.status(404).send("Airbnb not found");
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (!user) {
+      return res
+        .status(400)
+        .render("login", { error: "Invalid username or password" });
     }
-    res.render("view", {
-      listing: listing,
+
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return res
+        .status(400)
+        .render("login", { error: "Invalid username or password" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, username: user.username, role: user.roles },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
     });
-  } catch (err) {
-    res.status(500).send(err);
+
+    res.redirect("/");
+  } catch (error) {
+    res.status(500).render("login", { error: "Internal server error" });
   }
 });
+
+app.post("/airbnb/logout", (req, res) => {
+  res.clearCookie("jwt", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  });
+  res.redirect("/");
+});
+
+app.get(
+  "/airbnb/:listing_id",
+  authenticateUINonRedirect,
+  async function (req, res) {
+    const id = req.params.listing_id;
+    try {
+      const listing = await db.getAirBnBById(id);
+      if (!listing) {
+        return res.status(404).send("Airbnb not found");
+      }
+      res.render("view", {
+        listing: listing,
+        isAuthenticated: !!req.user,
+      });
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  }
+);
 
 //add new airbnb
-app.get("/addnewairbnb/:step?", function (req, res) {
+app.get("/addnewairbnb/:step?", authenticateUI, function (req, res) {
   const step = parseInt(req.params.step) || 1;
   const formData = req.query;
   res.render(`addnewairbnb-step${step}`, {
     step: step,
     formData: formData,
+    isAuthenticated: !!req.user,
   });
 });
 
-app.post("/addnewairbnb", async function (req, res) {
+app.post("/addnewairbnb", authenticateUI, async function (req, res) {
   try {
     const newAirbnb = new Airbnb({
       _id: req.body._id || new mongoose.Types.ObjectId().toString(),
@@ -124,7 +208,6 @@ app.post("/addnewairbnb", async function (req, res) {
     });
 
     await newAirbnb.save();
-    console.log("New Airbnb saved successfully:", newAirbnb);
     res.redirect("/");
   } catch (err) {
     console.error("Error saving Airbnb:", err);
@@ -133,21 +216,21 @@ app.post("/addnewairbnb", async function (req, res) {
 });
 
 //update airbnb
-app.get("/update/airbnb/:id", async function (req, res) {
+app.get("/update/airbnb/:id", authenticateUI, async function (req, res) {
   try {
     const id = req.params.id;
     const listing = await db.getAirBnBById(id);
     if (!listing) {
       return res.status(404).send("Airbnb not found");
     }
-    res.render("update", { listing });
+    res.render("update", { listing, isAuthenticated: !!req.user });
   } catch (err) {
     console.error("Error fetching Airbnb for update:", err);
     res.status(500).send(err);
   }
 });
 
-app.post("/update/airbnb/:id", async function (req, res) {
+app.post("/update/airbnb/:id", authenticateUI, async function (req, res) {
   try {
     const id = req.params.id;
 
@@ -162,7 +245,6 @@ app.post("/update/airbnb/:id", async function (req, res) {
 
     await db.updateAirBnBById(updatedData, id);
 
-    console.log(`Updated Airbnb with ID: ${id}`);
     res.redirect(`/airbnb/${id}`);
   } catch (err) {
     console.error("Error updating Airbnb:", err);
@@ -171,11 +253,10 @@ app.post("/update/airbnb/:id", async function (req, res) {
 });
 
 //delete airbnb
-app.post("/delete/airbnb/:id", async function (req, res) {
+app.post("/delete/airbnb/:id", authenticateUI, async function (req, res) {
   try {
     const id = req.params.id;
     const result = await db.deleteAirBnBById(id);
-    console.log(`Deleted Airbnb with ID: ${id}`);
     res.redirect("/");
   } catch (err) {
     console.error(`Error deleting Airbnb with ID: ${id}`, err);
@@ -184,7 +265,7 @@ app.post("/delete/airbnb/:id", async function (req, res) {
 });
 
 //search airbnb
-app.get("/search", async function (req, res) {
+app.get("/search", authenticateUINonRedirect, async function (req, res) {
   const searchName = req.query.name;
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
@@ -215,6 +296,7 @@ app.get("/search", async function (req, res) {
       totalPages,
       hasNextPage: page < totalPages,
       hasPrevPage: page > 1,
+      isAuthenticated: !!req.user,
     });
   } catch (err) {
     console.error("Error searching for Airbnb listings:", err);

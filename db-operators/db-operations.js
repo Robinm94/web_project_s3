@@ -16,7 +16,6 @@ module.exports = {
     const newAirBnB = new Airbnb(data);
     try {
       const result = await newAirBnB.save();
-      console.log("New AirBnB added:", result);
       return result;
     } catch (err) {
       console.error("Error adding new AirBnB:", err);
@@ -43,7 +42,6 @@ module.exports = {
       if (!result) {
         throw new Error("AirBnB not found");
       }
-      console.log("AirBnB updated:", result);
       return result;
     } catch (err) {
       console.error("Error updating AirBnB by ID:", err);
@@ -57,7 +55,6 @@ module.exports = {
       if (!result) {
         throw new Error("AirBnB not found");
       }
-      console.log("AirBnB deleted:", result);
       return result;
     } catch (err) {
       console.error("Error deleting AirBnB by ID:", err);

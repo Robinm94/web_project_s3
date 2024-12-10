@@ -445,3 +445,23 @@ body {
   margin-bottom: 10px;
   color: #555;
 }
+
+.logout-form {
+  display: inline;
+}
+
+.logout-button {
+  background-color: #ff5a5f;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  font-weight: bold;
+  font-size: unset;
+}
+
+.logout-button:hover {
+  background-color: #ff787d;
+}

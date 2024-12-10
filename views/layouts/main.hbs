@@ -9,7 +9,14 @@
     <header class="header">
       <nav class="nav">
         <a href="/" class="nav-link">Home</a>
-        <a href="/addnewairbnb" class="nav-link">Add New</a>
+        {{#if isAuthenticated}}
+          <a href="/addnewairbnb" class="nav-link">Add New</a>
+          <form action="/airbnb/logout" method="post" class="logout-form">
+            <button type="submit" class="logout-button">Logout</button>
+          </form>
+        {{else}}
+          <a href="/airbnb/login" class="nav-link">Login</a>
+        {{/if}}
         <form action="/search" method="get" class="search-form">
           <label for="searchName" class="search-label">Search:</label>
           <input
