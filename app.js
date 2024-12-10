@@ -2,16 +2,18 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
-const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const passport = require("./config/passport");
 const userRoutes = require("./routes/userRoutes");
 const db = require("./db-operators/db-operations");
 const database = require("./config/database");
+const { graphqlHTTP } = require("express-graphql");
+const schema = require("./graphql/schema");
 const Airbnb = require("./models/airbnb");
 const User = require("./models/user");
 const jwt = require("jsonwebtoken");
 const { body, query, param, validationResult } = require("express-validator");
+const bcrypt = require("bcrypt");
 
 const app = express();
 
@@ -94,6 +96,14 @@ app.engine(
   })
 );
 app.set("view engine", "hbs");
+
+app.use(
+  "/graphql",
+  graphqlHTTP({
+    schema,
+    graphiql: true,
+  })
+);
 
 app.get("/", authenticateUINonRedirect, async function (req, res) {
   const page = parseInt(req.query.page) || 1;
