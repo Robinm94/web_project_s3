@@ -7,7 +7,7 @@ const passport = require("./config/passport");
 const userRoutes = require("./routes/userRoutes");
 const db = require("./db-operators/db-operations");
 const database = require("./config/database");
-const { graphqlHTTP } = require("express-graphql");
+const { createHandler } = require("graphql-http/lib/use/express");
 const schema = require("./graphql/schema");
 const Airbnb = require("./models/airbnb");
 const User = require("./models/user");
@@ -99,9 +99,8 @@ app.set("view engine", "hbs");
 
 app.use(
   "/graphql",
-  graphqlHTTP({
+  createHandler({
     schema,
-    graphiql: true,
   })
 );
 
