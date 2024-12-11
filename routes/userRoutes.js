@@ -9,7 +9,9 @@ const router = express.Router();
 router.post("/register", async (req, res) => {
   try {
     const { username, password } = req.body;
-
+    if (!username || !password) {
+      return res.status(400).json({ error: "username and password required" });
+    }
     // Check if the username already exists
     const existingUser = await User.findOne({ username });
     if (existingUser) {
