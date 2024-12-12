@@ -76,6 +76,19 @@ const authorize = (roles) => {
   };
 };
 
+// Role-based authorization middleware
+const authorizeUI = (roles) => {
+  return (req, res, next) => {
+    if (!roles.some((role) => req.user.roles.includes(role))) {
+      return res.render("error", {
+        isAuthenticated: !!req.user,
+        error: "Forbidden - You do not have permission to access this resource",
+      });
+    }
+    next();
+  };
+};
+
 const path = require("path");
 app.use(express.static(path.join(__dirname, "public")));
 app.set("views", path.join(__dirname, "views"));
@@ -122,7 +135,10 @@ app.get("/", authenticateUINonRedirect, async function (req, res) {
       isAuthenticated: !!req.user,
     });
   } catch (err) {
-    res.status(500).send(err);
+    res.render("error", {
+      isAuthenticated: !!req.user,
+      error: "Failed to fetch Airbnb listings",
+    });
   }
 });
 
@@ -148,7 +164,7 @@ app.post("/airbnb/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, username: user.username, role: user.roles },
+      { id: user._id, username: user.username, roles: user.roles },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -187,7 +203,10 @@ app.get(
         isAuthenticated: !!req.user,
       });
     } catch (err) {
-      res.status(500).send(err);
+      res.render("error", {
+        isAuthenticated: !!req.user,
+        error: "Failed to fetch Airbnb",
+      });
     }
   }
 );
@@ -205,10 +224,19 @@ app.get("/addnewairbnb/:step?", authenticateUI, function (req, res) {
 
 app.post("/addnewairbnb", authenticateUI, async function (req, res) {
   try {
+    let uniqueId = false;
+    do {
+      const id = Math.floor(Math.random() * 1000000);
+      const existingAirbnb = await Airbnb.findById(id);
+      if (!existingAirbnb) {
+        uniqueId = true;
+        req.body._id = id;
+      }
+    } while (!uniqueId);
     const newAirbnb = new Airbnb({
-      _id: req.body._id || new mongoose.Types.ObjectId().toString(),
+      _id: req.body._id,
       name: req.body.name,
-      summary: req.body.summary,
+      description: req.body.description,
       price: req.body.price,
       bedrooms: req.body.bedrooms,
       beds: req.body.beds,
@@ -220,7 +248,10 @@ app.post("/addnewairbnb", authenticateUI, async function (req, res) {
     res.redirect("/");
   } catch (err) {
     console.error("Error saving Airbnb:", err);
-    res.status(500).send(err);
+    res.render("error", {
+      isAuthenticated: !!req.user,
+      error: "Failed to save Airbnb",
+    });
   }
 });
 
@@ -235,7 +266,10 @@ app.get("/update/airbnb/:id", authenticateUI, async function (req, res) {
     res.render("update", { listing, isAuthenticated: !!req.user });
   } catch (err) {
     console.error("Error fetching Airbnb for update:", err);
-    res.status(500).send(err);
+    res.render("error", {
+      isAuthenticated: !!req.user,
+      error: "Failed to fetch Airbnb to update",
+    });
   }
 });
 
@@ -245,7 +279,7 @@ app.post("/update/airbnb/:id", authenticateUI, async function (req, res) {
 
     const updatedData = {
       name: req.body.name,
-      summary: req.body.summary,
+      description: req.body.summary,
       price: req.body.price,
       bedrooms: req.body.bedrooms,
       bathrooms: req.body.bathrooms,
@@ -257,21 +291,32 @@ app.post("/update/airbnb/:id", authenticateUI, async function (req, res) {
     res.redirect(`/airbnb/${id}`);
   } catch (err) {
     console.error("Error updating Airbnb:", err);
-    res.status(500).send(err);
+    res.render("error", {
+      error: "Failed to update Airbnb",
+      isAuthenticated: !!req.user,
+    });
   }
 });
 
 //delete airbnb
-app.post("/delete/airbnb/:id", authenticateUI, async function (req, res) {
-  try {
-    const id = req.params.id;
-    const result = await db.deleteAirBnBById(id);
-    res.redirect("/");
-  } catch (err) {
-    console.error(`Error deleting Airbnb with ID: ${id}`, err);
-    res.status(500).send("Error deleting Airbnb");
+app.post(
+  "/delete/airbnb/:id",
+  authenticateUI,
+  authorizeUI(["admin"]),
+  async function (req, res) {
+    try {
+      const id = req.params.id;
+      await db.deleteAirBnBById(id);
+      res.redirect("/");
+    } catch (err) {
+      console.error(`Error deleting Airbnb with ID: ${id}`, err);
+      res.render("error", {
+        isAuthenticated: !!req.user,
+        error: "Failed to delete Airbnb",
+      });
+    }
   }
-});
+);
 
 //search airbnb
 app.get("/search", authenticateUINonRedirect, async function (req, res) {
@@ -309,7 +354,10 @@ app.get("/search", authenticateUINonRedirect, async function (req, res) {
     });
   } catch (err) {
     console.error("Error searching for Airbnb listings:", err);
-    res.status(500).send("Error searching for Airbnb listings.");
+    res.render("error", {
+      isAuthenticated: !!req.user,
+      error: "Failed to search for Airbnb listings",
+    });
   }
 });
 

@@ -1,7 +1,7 @@
 <h1 class="form-title">Step 4: Submit</h1>
 <form action="/addnewairbnb" method="post" class="submit-form">
   <input type="hidden" name="name" value="{{formData.name}}" />
-  <input type="hidden" name="summary" value="{{formData.summary}}" />
+  <input type="hidden" name="description" value="{{formData.description}}" />
   <input type="hidden" name="price" value="{{formData.price}}" />
   <input type="hidden" name="bedrooms" value="{{formData.bedrooms}}" />
   <input type="hidden" name="beds" value="{{formData.beds}}" />
@@ -10,7 +10,7 @@
 
   <div class="form-summary">
     <p><strong>Name:</strong> {{formData.name}}</p>
-    <p><strong>Summary:</strong> {{formData.summary}}</p>
+    <p><strong>Description:</strong> {{formData.description}}</p>
     <p><strong>Price:</strong> ${{formData.price}}</p>
     <p><strong>Bedrooms:</strong> {{formData.bedrooms}}</p>
     <p><strong>Beds:</strong> {{formData.beds}}</p>
